@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.6.1"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
-http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
-http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
     <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
     <db:mysql-config name="MySQL_Configuration" host="localhost" port="87" user="usrPrecios" password="5czsxy9xHh5zHF3" doc:name="MySQL Configuration" database="INTEGRA"/>
     <flow name="entrega4Flow">
@@ -20,9 +18,12 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
                 <choice doc:name="Choice">
                     <when expression="#[message.inboundProperties.'http.query.params'.date.matches(&quot;^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\\d\\d$&quot;) != false]">
                         <set-variable variableName="date" value="#[message.inboundProperties.'http.query.params'.date]" doc:name="date"/>
-                        <set-payload value="#['Hello, SKU is ' + flowVars.sku  + '. Date is ' + flowVars.date + '.' ]" doc:name="Set Payload"/>
                         <db:select config-ref="MySQL_Configuration" doc:name="Database">
-                            <db:parameterized-query><![CDATA[Select * from Productos]]></db:parameterized-query>
+                            <db:parameterized-query><![CDATA[SELECT *
+FROM precios
+WHERE sku = #[flowVars.sku] AND Fecha_Inicio <= STR_TO_DATE(#[flowVars.date],'%m-%d-%Y')
+ORDER BY Fecha_Inicio DESC 
+LIMIT 1;]]></db:parameterized-query>
                         </db:select>
                     </when>
                     <otherwise>
