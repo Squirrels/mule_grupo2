@@ -10,7 +10,8 @@ Parámetros:
 -date (mm-dd-yyyy)
 
 Retorno: Json {Fecha_Inicio, Precio, sku}
---------------------------------------------------
+
+
 Twitter: .../tweets/
 
 Parámetros:
