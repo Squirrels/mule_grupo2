@@ -19,20 +19,16 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
             <when expression="#[message.inboundProperties.'http.query.params'.id.matches(&quot;^[0-9]*$&quot;) != false]">
                 <set-variable variableName="id" value="#[message.inboundProperties.'http.query.params'.id]" doc:name="ID"/>
                 <set-variable variableName="url" value="#[message.inboundProperties.'http.query.params'.url]" doc:name="URL"/>
-                <db:update config-ref="MySQL_Configuration_Insert" doc:name="Database Insert">
-                    <db:parameterized-query><![CDATA[INSERT INTO INTEGRA.TWEETS (`Id`, `Url`, `Grupo`) VALUES (#[flowVars.id], #[flowVars.url], '2');]]></db:parameterized-query>
-                </db:update>
-                <set-payload value="#[&quot;Inserted into database&quot;]" doc:name="Set Payload"/>
+                <db:insert config-ref="MySQL_Configuration_Insert" doc:name="Database Insert">
+                    <db:parameterized-query><![CDATA[INSERT INTO INTEGRA.TWEETS (Id, Url, Grupo) VALUES (#[flowVars.id], #[flowVars.url], '2');]]></db:parameterized-query>
+                </db:insert>
+                <set-payload value="#[&quot;Inserted into database. ID: &quot; + flowVars.id]" doc:name="Set Payload"/>
             </when>
             <otherwise>
                 <set-payload value="#['Message: ID error' ]" doc:name="Set Payload"/>
             </otherwise>
         </choice>
         <json:object-to-json-transformer doc:name="Object to JSON"/>
-        <catch-exception-strategy doc:name="Catch Exception Strategy">
-            <set-payload value="#[&quot;Exception: Duplicated Primary Key&quot;]" doc:name="Set Payload"/>
-            <json:object-to-json-transformer doc:name="Object to JSON"/>
-        </catch-exception-strategy>
     </flow>
     <flow name="integra2Flow">
         <http:listener config-ref="HTTP_Listener_Configuration" path="prices/" doc:name="HTTP"/>
