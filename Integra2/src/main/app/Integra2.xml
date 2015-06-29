@@ -19,7 +19,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
             <when expression="#[message.inboundProperties.'http.query.params'.id.matches(&quot;^[0-9]*$&quot;) != false]">
                 <set-variable variableName="id" value="#[message.inboundProperties.'http.query.params'.id]" doc:name="ID"/>
                 <set-variable variableName="url" value="#[message.inboundProperties.'http.query.params'.url]" doc:name="URL"/>
-                <db:insert config-ref="TEST_MySQL_Configuration" doc:name="Database Insert">
+                <db:insert config-ref="MySQL_Configuration_Insert" doc:name="Database Insert">
                     <db:parameterized-query><![CDATA[INSERT INTO `test`.`tweets` (`Id`, `Url`, `Grupo`) VALUES (#[flowVars.id], #[flowVars.url], '2');]]></db:parameterized-query>
                 </db:insert>
                 <set-payload value="#[&quot;Inserted into database&quot;]" doc:name="Set Payload"/>
@@ -39,7 +39,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
             <when expression="#[message.inboundProperties.'http.query.params'.sku.matches(&quot;^[0-9]{1,2}$&quot;) != false &amp;&amp; message.inboundProperties.'http.query.params'.date.matches(&quot;^(0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[-](19|20)\\d\\d$&quot;) != false]">
                 <set-variable variableName="sku" value="#[message.inboundProperties.'http.query.params'.sku]" doc:name="sku"/>
                 <set-variable variableName="date" value="#[message.inboundProperties.'http.query.params'.date]" doc:name="date"/>
-                <db:select config-ref="TEST_MySQL_Configuration" doc:name="Database">
+                <db:select config-ref="MySQL_Configuration" doc:name="Database">
                     <db:parameterized-query><![CDATA[SELECT *
 FROM precios
 WHERE sku = #[flowVars.sku] AND Fecha_Inicio <= STR_TO_DATE(#[flowVars.date],'%m-%d-%Y')
