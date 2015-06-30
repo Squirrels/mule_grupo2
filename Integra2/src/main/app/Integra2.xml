@@ -22,7 +22,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
                 <db:insert config-ref="MySQL_Configuration_Insert" doc:name="Database Insert">
                     <db:parameterized-query><![CDATA[INSERT INTO INTEGRA.TWEETS (Id, Url, Grupo) VALUES (#[flowVars.id], #[flowVars.url], '2');]]></db:parameterized-query>
                 </db:insert>
-                <set-payload value="#[&quot;Inserted into database. ID: &quot; + flowVars.id]" doc:name="Set Payload"/>
+                <set-payload value="#['[{&quot;message: inserted into database. ID: &quot; '+ flowVars.id'&quot;}]' ]" doc:name="Insert"/>
             </when>
             <otherwise>
                 <set-payload value="#['[{&quot;message&quot;: &quot;id error&quot;}]' ]" doc:name="Set Payload"/>
