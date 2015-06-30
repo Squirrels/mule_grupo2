@@ -25,10 +25,14 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
                 <set-payload value="#[&quot;Inserted into database. ID: &quot; + flowVars.id]" doc:name="Set Payload"/>
             </when>
             <otherwise>
-                <set-payload value="#['Message: ID error' ]" doc:name="Set Payload"/>
+                <set-payload value="#['[{&quot;message&quot;: &quot;id error&quot;}]' ]" doc:name="Set Payload"/>
             </otherwise>
         </choice>
         <json:object-to-json-transformer doc:name="Object to JSON"/>
+        <catch-exception-strategy doc:name="Copy_of_Catch Exception Strategy">
+            <set-payload value="#['[{&quot;message&quot;: &quot;'+ exception.cause.message +'&quot;}]' ]" doc:name="Set Payload"/>
+            <json:object-to-json-transformer doc:name="Object to JSON"/>
+        </catch-exception-strategy>
     </flow>
     <flow name="integra2Flow">
         <http:listener config-ref="HTTP_Listener_Configuration" path="prices/" doc:name="HTTP"/>
@@ -45,18 +49,18 @@ LIMIT 1;]]></db:parameterized-query>
                 </db:select>
             </when>
             <when expression="#[message.inboundProperties.'http.query.params'.sku.matches(&quot;^[0-9]{1,2}$&quot;) == false ]">
-                <set-payload value="#['Message: Sku error' ]" doc:name="Sku error"/>
+                <set-payload value="#['[{&quot;message&quot;: &quot;sku error&quot;}]' ]" doc:name="Sku error"/>
             </when>
             <when expression="#[message.inboundProperties.'http.query.params'.date.matches(&quot;^(0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[-](19|20)\\d\\d$&quot;) == false]">
-                <set-payload value="#['Message: Date error. Format mm-dd-yyyy' ]" doc:name="Date error"/>
+                <set-payload value="#['[{&quot;message&quot;: &quot;date error (mm-dd-yyyy format)&quot;}]' ]" doc:name="Date error"/>
             </when>
             <otherwise>
-                <set-payload value="#['Message: Date error' ]" doc:name="Date and Sku error"/>
+                <set-payload value="#['[{&quot;message&quot;: &quot;date and sku error&quot;}]' ]" doc:name="Date and Sku error"/>
             </otherwise>
         </choice>
         <json:object-to-json-transformer doc:name="Object to JSON"/>
         <catch-exception-strategy doc:name="Catch Exception Strategy">
-            <set-payload value="#[&quot;Exception:&quot;]" doc:name="Set Payload"/>
+            <set-payload value="#['[{&quot;message&quot;: &quot;'+ exception.cause.message +'&quot;}]' ]" doc:name="Set Payload"/>
             <json:object-to-json-transformer doc:name="Object to JSON"/>
         </catch-exception-strategy>
     </flow>
